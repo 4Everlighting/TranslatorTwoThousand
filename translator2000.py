@@ -59,7 +59,7 @@ def translate_text(TEXT):
 	return(translated_text)
 def translate_url(URL):
 	# read text from uri -> return string
-    response = requests.get(URL)
+    response = requests.get(URL)       
     return translate_text(response.content.decode())
 def translate_file(FILE_PATH):
 	# read text from file -> return string
