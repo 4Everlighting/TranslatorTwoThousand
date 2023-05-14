@@ -1,6 +1,6 @@
 #Assignment: Python Project 1
-#Joshua Pacheco (JP), 5/14/2023, The Translator Two Thousand
-#I am estimating this will take 6 hours to code
+#Joshua Pacheco (JP), 5/14/2023, The Translator Two Thousand, Python3 project
+#I am estimating this will take 4 hours to code. It actually took 6 hours, as I had issues with getting the URL entry to work and debugging
 # sys for bailing out of script runtime with exit method
 import sys
 # requests for acquiring internet resources for translatio 
