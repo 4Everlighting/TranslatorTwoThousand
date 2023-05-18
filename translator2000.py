@@ -1,6 +1,7 @@
 #Assignment: Python Project 1
 #Joshua Pacheco (JP), 5/14/2023, The Translator Two Thousand, Python3 project
 #I am estimating this will take 4 hours to code. It actually took 6 hours, as I had issues with getting the URL entry to work and debugging
+#Spent an additional 2 hours adding the Speech to text and text to speech library mod
 
 # sys for bailing out of script runtime with exit method
 import sys
@@ -8,6 +9,11 @@ import sys
 import requests
 # os library for validating local file existence
 import os
+import speech_recognition as sr
+import pyttsx3
+
+#initializes pyttsx3 globally
+engine = pyttsx3.init()
 # textblob for translation capability
 from textblob import TextBlob
 # set minimum text size to consider as valid text to translated
@@ -116,6 +122,7 @@ def main():
         print("2. Translate text")
         print("3. Translate text from URL")
         print("4. Translate text from local file")
+        print("5. Translate from Speech")
         print("0. Exit")
 
         choice = get_choice(MAX_CHOICE)
@@ -133,6 +140,20 @@ def main():
             translate_url(input("Enter URL: "))
         elif choice == 4:
             translate_file(input("Enter File: "))
+        elif choice == 5:
+             beginText = TextBlob("Hello Sir, please tell me what you would like to translate")
+             engine.say(beginText)
+             engine.runAndWait()
+
+             rec = sr.Recognizer()
+             with sr.Microphone() as source:
+                 print("Please speak...")
+                 audio = rec.listen(source)
+                 print("Processing...")
+                 text = rec.recognize_google(audio, language='en-in')
+                 engine.runAndWait()
+                 translate_text(text)
+                 print(f"What I heard you say:{text}")
         elif choice == 0:
             sys.exit(0)
 # option 1)
