@@ -14,12 +14,26 @@ import pyttsx3
 
 #initializes pyttsx3 globally
 engine = pyttsx3.init()
+
+#print(engine.getProperty("voice"))
+voices = engine.getProperty('voices')
+engine.setProperty('voice', voices[0].id)
+#for voice in voices:
+ #   print(voice, voice.id)
+  #  engine.setProperty('voice', voice.id)
+engine.say("Hello I AM the Translator Interface Two Thousand. Please select from the MENU")
+engine.runAndWait()
+    #engine.stop()
 # textblob for translation capability
 from textblob import TextBlob
 # set minimum text size to consider as valid text to translated
 MINIMUM_TEXT_LENGTH = 3
 MAX_CHOICE = 5
 TRANSLATED_LANGUAGE_FILE = 'selected_language.txt'
+LANGUAGE_IDS = {
+     "ru":3,
+     "es":2,
+}
 SUPPORTED_LANGUAGES = {
 	'Spanish': 'es',
 	'Afrikaans': 'af',
@@ -86,11 +100,20 @@ def translate_text(TEXT):
 		return None
 	# translate arbitrary text string to selected language -> return string
 	DESTINATION_LANGUAGE_KEY = get_translated_language()
-	#print(f'Translating text "{TEXT}" to language "{DESTINATION_LANGUAGE_KEY}"!')
+	if DESTINATION_LANGUAGE_KEY in LANGUAGE_IDS.keys():
+		voice_id = LANGUAGE_IDS[DESTINATION_LANGUAGE_KEY]
+		print(f'requested language of "{DESTINATION_LANGUAGE_KEY}" is supported. configuring pytts to use voice #{voice_id}')
+		engine.setProperty('voice', voices[voice_id].id)
+
+	else:
+		print(f'requested language of "{DESTINATION_LANGUAGE_KEY}" is NOT supported. not overriding pytts language')
+
+	print(f'Translating text "{TEXT}" to language "{DESTINATION_LANGUAGE_KEY}"!')
+
 	b = TextBlob(TEXT)
 	translated_text = b.translate(from_lang='en', to=DESTINATION_LANGUAGE_KEY)
 	print(f'Translation: "{translated_text}"')
-	with open("result.txt", "w") as f:
+	with open("result.txt", "w", encoding="utf-8") as f:
 		f.write(str(translated_text))
 	return(translated_text)
 def translate_url(URL):
@@ -115,15 +138,34 @@ def get_choice(max_choice):
             return int(choice)
         else:
             print("Invalid choice. Please enter a valid choice.")
+def translate_STT():
+             beginText = TextBlob("Hello, please tell me what you would like for me to translate and say")
+             engine.say(beginText)
+             engine.runAndWait()
+
+             rec = sr.Recognizer()
+             with sr.Microphone() as source:
+                 print("Please speak...")
+                 audio = rec.listen(source)
+                 print("Processing...")
+                 text = rec.recognize_google(audio, language='en-in')
+                 engine.runAndWait()
+                 print(f"What I heard you say:{text}")
+                 translated_text = translate_text(text)
+                                
+                 engine.say(translated_text)
+                 engine.runAndWait()
+                 
 def main():
     while True:
+        engine.setProperty('voice', voices[0].id)
         print("\nTranslator Two Thousand MENU:")
-        print("1. Select translated language")
-        print("2. Translate text")
-        print("3. Translate text from URL")
-        print("4. Translate text from local file")
-        print("5. Translate from Speech")
-        print("0. Exit")
+        print("1. Choose translated language")
+        print("2. Translate from your typed text")
+        print("3. Translate text from a URL")
+        print("4. Translate text from a Local File")
+        print("5. Translate from Speech Recognition and Speak translation")
+        print("0. To Exit the Program")
 
         choice = get_choice(MAX_CHOICE)
 
@@ -141,19 +183,7 @@ def main():
         elif choice == 4:
             translate_file(input("Enter File: "))
         elif choice == 5:
-             beginText = TextBlob("Hello Sir, please tell me what you would like to translate")
-             engine.say(beginText)
-             engine.runAndWait()
-
-             rec = sr.Recognizer()
-             with sr.Microphone() as source:
-                 print("Please speak...")
-                 audio = rec.listen(source)
-                 print("Processing...")
-                 text = rec.recognize_google(audio, language='en-in')
-                 engine.runAndWait()
-                 translate_text(text)
-                 print(f"What I heard you say:{text}")
+             translate_STT()
         elif choice == 0:
             sys.exit(0)
 # option 1)
