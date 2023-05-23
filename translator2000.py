@@ -38,7 +38,7 @@ SUPPORTED_LANGUAGES = {
 	'Spanish': 'es',
 	'Afrikaans': 'af',
 	'Japanese': 'ja',
-	'Haitian': 'ht',
+	'Creole': 'ht',
 	'Filipino': 'tl',
 	'Russian': 'ru',
     'Swahili' : 'sw',
@@ -102,8 +102,10 @@ def translate_text(TEXT):
 	DESTINATION_LANGUAGE_KEY = get_translated_language()
 	if DESTINATION_LANGUAGE_KEY in LANGUAGE_IDS.keys():
 		voice_id = LANGUAGE_IDS[DESTINATION_LANGUAGE_KEY]
-		print(f'requested language of "{DESTINATION_LANGUAGE_KEY}" is supported. configuring pytts to use voice #{voice_id}')
+		print(f'requested language of "{DESTINATION_LANGUAGE_KEY}" is supported. configuring pyttsx3 to use voice #{voice_id}')
 		engine.setProperty('voice', voices[voice_id].id)
+		#engine.say(translated_text)
+		#engine.runAndWait()
 
 	else:
 		print(f'requested language of "{DESTINATION_LANGUAGE_KEY}" is NOT supported. not overriding pytts language')
@@ -116,6 +118,7 @@ def translate_text(TEXT):
 	with open("result.txt", "w", encoding="utf-8") as f:
 		f.write(str(translated_text))
 	return(translated_text)
+	
 def translate_url(URL):
 	# read text from uri -> return string
     response = requests.get(URL)       
@@ -128,7 +131,6 @@ def translate_file(FILE_PATH):
         found = True
       else:
         FILE_PATH = input("Enter a valid file path: ")
-		
     with open(FILE_PATH, 'r') as f:
 	    return translate_text(f.read())
 def get_choice(max_choice):
