@@ -28,8 +28,9 @@ engine.runAndWait()
 from textblob import TextBlob
 # set minimum text size to consider as valid text to translated
 MINIMUM_TEXT_LENGTH = 3
-MAX_CHOICE = 5
+MAX_CHOICE = 6
 TRANSLATED_LANGUAGE_FILE = 'selected_language.txt'
+RECOGNIZED_LANGUAGE_FILE = 'recognized_language.txt'
 LANGUAGE_IDS = {
      "ru":3,
      "es":2,
@@ -42,6 +43,13 @@ SUPPORTED_LANGUAGES = {
 	'Filipino': 'tl',
 	'Russian': 'ru',
     'Swahili' : 'sw',
+    'English' : 'en',
+}
+TEXTBLOB_LANGUAGES = {
+     'en-us': 'en',
+    'es-mx': 'es',
+
+
 }
 class InputValidator(object):
 	def __init__(self, prompt_text):
@@ -82,6 +90,18 @@ def list_supported_languages():
 	# validate a language name -> return true/false
 def is_valid_language(LANGUAGE):
     return(LanguageInputValidator(LANGUAGE).is_valid())  
+def set_recognized_language(LANGUAGE):
+    if LANGUAGE == 'english':
+      	with open(RECOGNIZED_LANGUAGE_FILE, 'w') as f:
+          f.write("en-us")
+          return True
+    elif LANGUAGE == 'spanish':
+      	with open(RECOGNIZED_LANGUAGE_FILE, 'w') as f:
+          f.write("es-mx")
+          return True
+    print("Error: Invalid recognized language- type english or spanish")
+    return None
+
 def set_translated_language(LANGUAGE):
 	# record selected language to file -> return true/false
 	if not is_valid_language(LANGUAGE):
@@ -90,6 +110,17 @@ def set_translated_language(LANGUAGE):
 	with open(TRANSLATED_LANGUAGE_FILE, 'w') as f:
 		f.write(SUPPORTED_LANGUAGES[LANGUAGE])
 	return True
+
+def get_recognized_language():
+    if not os.path.exists(RECOGNIZED_LANGUAGE_FILE):
+        return 'en-us'
+    l = ''
+    with open(RECOGNIZED_LANGUAGE_FILE, 'r') as f:
+     l = f.read()
+     
+    print(f'Returning lang {l}')
+    return(l)
+    
 def get_translated_language():
 	# return language we want to translate to -> return language key (eg, es, ru, etc)
 	with open(TRANSLATED_LANGUAGE_FILE, 'r') as f:
@@ -113,7 +144,10 @@ def translate_text(TEXT):
 	print(f'Translating text "{TEXT}" to language "{DESTINATION_LANGUAGE_KEY}"!')
 
 	b = TextBlob(TEXT)
-	translated_text = b.translate(from_lang='en', to=DESTINATION_LANGUAGE_KEY)
+	SRC_LANG = TEXTBLOB_LANGUAGES[get_recognized_language()]
+	print(f'we are translating text "{TEXT}" from "{SRC_LANG}" to "{DESTINATION_LANGUAGE_KEY}"')
+
+	translated_text = b.translate(from_lang=SRC_LANG, to=DESTINATION_LANGUAGE_KEY)
 	print(f'Translation: "{translated_text}"')
 	with open("result.txt", "w", encoding="utf-8") as f:
 		f.write(str(translated_text))
@@ -141,7 +175,7 @@ def get_choice(max_choice):
         else:
             print("Invalid choice. Please enter a valid choice.")
 def translate_STT():
-             beginText = TextBlob("Hello, please tell me what you would like for me to translate and say")
+             beginText = TextBlob("Okay, please tell me what you would like for me to translate and say")
              engine.say(beginText)
              engine.runAndWait()
 
@@ -150,7 +184,7 @@ def translate_STT():
                  print("Please speak...")
                  audio = rec.listen(source)
                  print("Processing...")
-                 text = rec.recognize_google(audio, language='en-in')
+                 text = rec.recognize_google(audio, language=get_recognized_language())
                  engine.runAndWait()
                  print(f"What I heard you say:{text}")
                  translated_text = translate_text(text)
@@ -167,6 +201,8 @@ def main():
         print("3. Translate text from a URL")
         print("4. Translate text from a Local File")
         print("5. Translate from Speech Recognition and Speak translation")
+        print("6. Choose Recognized Language")
+
         print("0. To Exit the Program")
 
         choice = get_choice(MAX_CHOICE)
@@ -186,6 +222,11 @@ def main():
             translate_file(input("Enter File: "))
         elif choice == 5:
              translate_STT()
+        elif choice == 6:
+            ok=False
+            while ok==False:
+              if set_recognized_language(input("Enter Recognized Language (english or spanish): ")) != None:
+                ok=True
         elif choice == 0:
             sys.exit(0)
 # option 1)
